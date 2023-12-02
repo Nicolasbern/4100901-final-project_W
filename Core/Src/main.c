@@ -25,10 +25,8 @@
 
 #include "lock.h"
 #include "keypad.h"
-#include "ring_buffer.h"
-#include "gui.h"
-#include "ssd1306.h"
-#include "ssd1306_fonts.h"
+
+
 
 /* USER CODE END Includes */
 
@@ -55,18 +53,6 @@ RTC_HandleTypeDef hrtc;
 /* USER CODE BEGIN PV */
 volatile uint16_t keypad_event = KEYPAD_EVENT_NONE;
 
-#define PACKET_LEN 30 // expected packet size
-
-uint8_t usart1_rx_buffer[PACKET_LEN];
-ring_buffer_t usart1_rb;
-
-uint8_t usart2_rx_buffer[PACKET_LEN];
-ring_buffer_t usart2_rb;
-
-uint32_t timestamp_usart1 = 0;
-uint32_t timestamp_usart2 = 0;
-
-uint8_t clave[4] = "2528";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -100,24 +86,6 @@ void keypad_it_callback(uint16_t pin)
 	keypad_event = pin;
 }
 
-void user_rx_callback_usart_1(void)
-{
-	if (LL_USART_IsActiveFlag_RXNE(USART1) != 0) {
-		uint8_t data = LL_USART_ReceiveData8(USART1);
-		ring_buffer_put(&usart1_rb, data); // buffer is full
-	}
-}
-
-void user_rx_callback_usart_2(void)
-{
-	if (LL_USART_IsActiveFlag_RXNE(USART2) != 0) {
-		uint8_t data = LL_USART_ReceiveData8(USART2);
-		if (ring_buffer_put(&usart2_rb, data) == 0 && // buffer is full
-				timestamp_usart2 == 0) { // full first time
-			timestamp_usart2 = HAL_GetTick();
-		}
-	}
-}
 /* USER CODE END 0 */
 
 /**
@@ -155,16 +123,6 @@ int main(void)
   /* USER CODE BEGIN 2 */
   lock_init();
   keypad_init();
-  ring_buffer_init(&usart1_rb, usart1_rx_buffer, PACKET_LEN);
-  ring_buffer_init(&usart2_rb, usart2_rx_buffer, PACKET_LEN);
-
-  LL_USART_EnableIT_RXNE(USART1);
-
-  // imprimir en la pantalla wating mientras se realiza un accion.
-  ssd1306_Fill(Black);
-  ssd1306_SetCursor(10, 10);
-  ssd1306_WriteString("Waiting", Font_16x26, White);
-  ssd1306_UpdateScreen();
 
   /* USER CODE END 2 */
 
@@ -182,53 +140,6 @@ int main(void)
 // registro
 
 
-// command manager
-
-	  uint16_t size = ring_buffer_size(&usart1_rb);
-
-	  if (size != 0 ){
-		  uint8_t comd[size];
-		  for (uint8_t idx = 0; idx < size; idx++) {
-			  // Get buffer variables
-			  ring_buffer_get(&usart1_rb, &comd[idx]);
-		  }
-
-		  if(comd[0] == '/'){
-			  uint8_t ingreso[10] = "/pass ";
-			  uint8_t act[11] = "/actualizar";
-			  if(ingreso[1] == comd[1] && ingreso[2] == comd[2] && ingreso[3] == comd[3]&& ingreso[4] == comd[4]
-																&& ingreso[5] == comd[5] && ingreso[6] == comd[6]){
-
-				  if (clave[0]== ingreso[7] && clave[1]== ingreso[8] && clave[2]== ingreso[9] && clave[3]== ingreso[10]){
-						GUI_unlocked();
-						HAL_Delay(3000);
-						ring_buffer_reset(&usart1_rb);}
-				  	  	GUI_wait();
-
-
-			  	  }else {
-			  		void GUI_failed();
-						HAL_Delay(3000);
-						ring_buffer_reset(&usart1_rb);
-						GUI_wait();
-			  	  	}
-			  if(act[1] == comd[1] && act[2] == comd[2] && act[3] == comd[3] && act[4] == comd[4] && act[5] == comd[5]
-								   && act[6] == comd[6] && act[7] == comd[7] && act[8] == comd[8] && act[9] == comd[9] && act[10] == comd[10]){
-				  for(uint8_t idx = 12; idx < size; idx++){
-					  clave[idx - 12] = comd[idx];
-					  ssd1306_Fill(Black);
-					  ssd1306_SetCursor(10, 10);
-					  ssd1306_WriteString("password", Font_16x26, White);
-					  ssd1306_SetCursor(30, 10);
-					  ssd1306_WriteString("update", Font_16x26, White);
-					  ssd1306_UpdateScreen();
-					  HAL_Delay(3000);
-					  ring_buffer_reset(&usart1_rb);
-					  GUI_wait();
-				  }
-			  }
-		  }
-	  }
 
 
     /* USER CODE END WHILE */

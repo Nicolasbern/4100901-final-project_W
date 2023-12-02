@@ -60,10 +60,41 @@ void GUI_wait(void){
 }
 
 void GUI_pass_update(void){
-	  ssd1306_Fill(Black);
-	  ssd1306_SetCursor(10, 10);
-	  ssd1306_WriteString("password", Font_16x26, White);
-	  ssd1306_SetCursor(30, 10);
-	  ssd1306_WriteString("update", Font_16x26, White);
-	  ssd1306_UpdateScreen();
+	 ssd1306_Fill(Black);
+	 ssd1306_SetCursor(10, 10);
+	 ssd1306_WriteString("password", Font_16x26, White);
+	 ssd1306_SetCursor(30, 10);
+	 ssd1306_WriteString("update", Font_16x26, White);
+	 ssd1306_UpdateScreen();
+}
+
+
+void GUI_second_validate(void){
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(10, 10);
+	ssd1306_WriteString("second", Font_16x26, White);
+	 ssd1306_SetCursor(30, 10);
+	 ssd1306_WriteString("validate", Font_16x26, White);
+	ssd1306_UpdateScreen();
+}
+
+void GUI_Fail(void){
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(10, 10);
+	ssd1306_WriteString("Fail", Font_16x26, White);
+	ssd1306_UpdateScreen();
+}
+
+void GUI_Retry (void){
+	ssd1306_SetCursor(10, 10);
+	ssd1306_WriteString("Retry", Font_16x26, White);
+	ssd1306_UpdateScreen();
+
+}
+
+void GUI_blocked (void){
+	ssd1306_SetCursor(10, 10);
+	ssd1306_WriteString("Blocked", Font_16x26, White);
+	ssd1306_UpdateScreen();
+
 }

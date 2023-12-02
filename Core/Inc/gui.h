@@ -19,7 +19,9 @@ void GUI_update_password_init(void);
 void GUI_update_password(uint8_t *password);
 void GUI_update_password_success(void);
 void GUI_wait(void);
-void GUI_wait(void);
 void GUI_pass_update(void);
+void GUI_Fail(void);
+void GUI_Retry (void);
+void GUI_blocked (void);
 
 #endif /* INC_GUI_H_ */
